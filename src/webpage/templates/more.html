@@ -1,0 +1,124 @@
+<!doctype html>
+
+<!--
+More page of the Wireless Outlet Controller web front-end
+
+@author The Absolute Tinkerer
+@date 27 March 2020
+-->
+
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Wireless Controller | More</title>
+	<link href="static/style.css" rel="stylesheet" type="text/css">
+	<link href="static/style-more.css" rel="stylesheet" type="text/css">
+	<link rel="shortcut icon" type="image/x-icon" href="static/favicon.ico">
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+</head>
+
+<script>
+	function loadForms() {
+		// AJAX to get the settings data from the server
+		$.ajax({
+			type: 'POST',
+			url: '/getSettings',
+			success: function(data) {
+				document.getElementById('latitude').value = data.result[0];
+				document.getElementById('longitude').value = data.result[1];
+				document.getElementById('time-zone').value = data.result[2];
+				document.getElementById('dst-selector').checked = data.result[3];
+			}
+		});
+	}
+
+	function dataChanged() {
+		// Enable the submit button to allow saving
+		document.getElementById('submit-button').disabled = false;
+	}
+
+	function submitClicked() {
+		var lat = document.getElementById('latitude').value;
+		var long = document.getElementById('longitude').value;
+		var tz = document.getElementById('time-zone').value;
+		var dst = document.getElementById('dst-selector').checked;
+
+		// AJAX to send the data to the server
+		$.ajax({
+			data: {lat: lat, long: long, tz: tz, dst: dst},
+			type: 'POST',
+			url: '/more_submit',
+			success: function(data) {
+				// Disable the submit button
+				document.getElementById('submit-button').disabled = true;
+			}
+		});
+	}
+</script>
+
+<body onLoad="loadForms();">
+	<div class="page-wrapper">
+		<nav class="nav-bar">
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="schedule.html">Schedule</a></li>
+				<li><a href="">More</a></li>
+			</ul>
+		</nav>
+		<main id="content" class="main">
+			<div class="more-section-header">
+				<div id="info-image" class="more-section-image"></div>
+				<div class="more-section-title">About</div>
+			</div>
+			<div class="more-section-content">
+				<p>This utility was developed by The Absolute Tinkerer. Please feel free to reach out via social media regarding any bugs you may discover or any improvement ideas you have!</p>
+				<p id="social-media"><a href="https://www.github.com/Absolute-Tinkerer" target="_blank">Github</a> | <a href="https://www.youtube.com/channel/UCqvLpyb58sk9Rq6_ewW-y3w" target="_blank">YouTube</a> | <a href="https://www.reddit.com/user/Absolute_Tinkerer" target="_blank">Reddit</a></p>
+			</div>
+			<div class="more-section-header">
+				<div id="settings-image" class="more-section-image"></div>
+				<div class="more-section-title">Settings</div>
+			</div>
+			<div class="more-section-content">
+				<form id="submit-form" onSubmit="submitClicked();return false;">
+					<div class="more-section-content-data">
+						<div class="more-section-content-data-row">
+							<h3>Latitude</h3>
+							<input id="latitude" onChange="dataChanged();" type="number" step="0.000001" min="-90" max="90" value="0" required>
+						</div>
+					</div>
+					<div class="more-section-content-data">
+						<div class="more-section-content-data-row">
+							<h3>Longitude</h3>
+							<input id="longitude" onChange="dataChanged();" type="number" step="0.000001" min="-180" max="180" value="0" required>
+						</div>
+					</div>
+					<div class="more-section-content-data">
+						<div class="more-section-content-data-row">
+							<h3>Standard Time UTC Offset</h3>
+							<input id="time-zone" onChange="dataChanged();" type="number" step="1" value="0" required>
+						</div>
+					</div>
+					<div class="more-section-content-data">
+						<div class="more-section-content-data-row">
+							<h3>Observes Daylight Savings?</h3>
+							<div class="dst-selector-container">
+								<label class="horizontal-selector">
+									<input id="dst-selector" onChange="dataChanged();" type="checkbox" checked>
+									<div class="horizontal-selector-left">No</div>
+									<div class="horizontal-selector-right">Yes</div>
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="submit-container">
+						<input id="submit-button" type="submit" value="Submit Changes" disabled>
+					</div>
+				</form>
+			</div>
+		</main>
+	</div>
+</body>
+</html>

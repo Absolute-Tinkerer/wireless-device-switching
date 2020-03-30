@@ -1,0 +1,385 @@
+@charset "utf-8";
+/* CSS Document */
+
+/* ------------- For unique schedule page bits ------------- */
+
+/* The switch - the box around the slider */
+/* Derived from w3schools.com/howto/howto_css_switch/asp */
+.schedule-element-toggle {
+	flex: 10%;
+	margin-top: auto;
+	margin-bottom: auto;
+}
+
+.switch {
+	position: relative;
+	display: flex;
+	padding-left: 4px;
+	padding-right: 4px;
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+/* The slider */
+.slider {
+	cursor: pointer;
+	width: 60px;
+	height: 34px;
+	border-radius: 34px;
+
+	background-color: #999999;
+	transition: .4s;
+}
+
+.slider:before {
+	position: absolute;
+	content: "";
+	height: 26px;
+	width: 26px;
+	border-radius: 50%;
+	left: 7px;
+	bottom: 4px;
+	background-color: #222222;
+	transition: .4s;
+}
+
+input:checked + .slider {
+	background-color: #0084FF;
+}
+
+input:checked + .slider:before {
+	transform: translateX(26px);
+}
+
+/* ------------ END OF SWITCH CSS ------------ */
+
+.header-add-button {
+	width: 60px;
+	margin-left: auto;
+}
+.add-schedule-button {
+	width: 40px;
+	height: 40px;
+	border-radius: 25px;
+	font-size: 15px;
+	box-shadow: none;
+}
+
+.schedule-element-header {
+	display: flex;
+	font-size: 14px;
+	padding-bottom: 3px;
+	border-bottom: 1px solid #5C7996;
+}
+
+.schedule-element-header-data {
+	flex: 90%;
+	margin: 0px;
+	margin-left: 20px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.schedule-element-header-button {
+	flex: 10%;
+	height: 18px;
+	margin: 0px;
+	margin-right: 20px;
+	margin-top: auto;
+	margin-bottom: auto;
+	font-size: 12px;
+}
+
+.schedule-element-time-absolute, .schedule-element-time-relative {
+	flex: 100%;
+	font-size: 28px;
+	text-align: right;
+	margin-top: auto;
+	margin-bottom: auto;
+}
+
+.schedule-element-time-absolute p, .schedule-element-time-relative p {
+	margin: 0px;
+	padding: 0px;
+}
+
+.schedule-element-days {
+	width: 150px;
+	font-size: 12px;
+	margin-top: auto;
+	margin-bottom: auto;
+	padding-left: 5px;
+	padding-right: 5px;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.schedule-element-days ul {
+	margin: 0px;
+	padding: 0px;
+	list-style: none;
+	display: table;
+	table-layout: fixed;
+	width: 100%;
+
+	text-align: center;
+	overflow: hidden;
+}
+
+.schedule-element-days li {
+	display: table-cell;
+}
+
+.schedule-day-on {
+	color: #0084FF;
+}
+
+.schedule-day-off {
+	color: #e4e4e4;
+}
+
+.schedule-element-footer {
+	display: flex;
+	margin: 0px;
+	padding: 10px;
+}
+
+/* CSS for the ADD section */
+.add-relative-absolute-selector {
+	display: flex;
+	width: 400px;
+	margin-left: auto;
+	margin-right: auto;
+	padding-top: 8px;
+}
+
+.add-absolute, .add-relative {
+	display: flex;
+	width: 500px;
+	font-size: 18px;
+	margin-left: auto;
+	margin-right: auto;
+	padding-bottom: 8px;
+}
+
+.double-spinner {
+	width: 30%;
+}
+
+.single-spinner {
+	width: 15%;
+}
+
+.colon {
+	width: 2%;
+	text-align: center;
+	margin-top: auto;
+	margin-bottom: auto;
+}
+
+.absolute-am-pm-selector {
+	width: 38%;
+	margin-top: auto;
+	margin-bottom: auto;
+	margin-left: 5px;
+}
+
+.relative-min-hour-selector, .relative-before-after-selector, .relative-sunrise-sunset-selector {
+	width: 20%;
+	margin-top: auto;
+	margin-bottom: auto;
+	padding-left: 5px;
+}
+
+.double-spinner, .single-spinner {
+	font-size: 30px;
+	text-align: center;
+	padding: 5px;
+}
+
+.double-spinner button, .single-spinner button {
+	width: 100%;
+	color: #d0d0d0;
+	background-color: #353535;
+	margin: 0px;
+	padding: 0px;
+	cursor: pointer;
+
+	border-radius: 5px;
+	outline: none;
+	box-shadow: none;
+}
+
+.double-spinner button:hover, .single-spinner button:hover {
+	box-shadow: 0 0 5px 2px #d0d0d0;
+}
+
+.double-spinner button:active, .single-spinner button:active {
+	background-color: #252525;
+}
+
+.double-spinner p, .single-spinner p {
+	margin: 0px;
+	padding: 0px;
+	margin-top: auto;
+	margin-bottom: auto;
+}
+
+#add-schedule-element .schedule-element-days {
+	width: 500px;
+	font-size: 20px;
+	margin-left: auto;
+	margin-right: auto;
+	cursor: pointer;
+}
+
+#add-schedule-element .schedule-day-off:hover, #add-schedule-element .schedule-day-on:hover {
+	border-radius: 15px;
+	background-color: #1B1B1B;
+}
+
+.device-container {
+	display: flex;
+	width: 500px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 2px;
+}
+
+.device-selected-true, .device-selected-false {
+	flex: 80%;
+	font-size: 20px;
+	margin: auto;
+	text-align: center;
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.device-selected-true {
+	color: #0084FF;
+}
+
+.device-selected-false {
+	color: #E4E4E4;
+}
+
+.device-selected-true:hover, .device-selected-false:hover {
+	border-radius: 15px;
+	background-color: #1B1B1B;
+}
+
+.device-state {
+	flex: 20%;
+}
+
+#add-schedule-element .button-container {
+	width: 500px;
+	margin-left: auto;
+	margin-right: auto;
+	padding-bottom: 8px;
+}
+
+.more-section-content-data-row {
+	display: flex;
+}
+
+@media screen and (max-width: 600px) {
+	.schedule-element-header h3 {
+		font-size: 14px;
+	}
+
+	.schedule-element-header button {
+		font-size: 10px;
+	}
+
+	.schedule-element-days {
+		width: 125px;
+		font-size: 9px;
+		font-weight: 400;
+	}
+
+	.schedule-element-time-absolute {
+		font-size: 26px;
+	}
+
+	.schedule-element-time-relative {
+		font-size: 16px;
+	}
+
+	.add-relative-absolute-selector {
+		width: 90%;
+	}
+
+	.add-absolute, .add-relative {
+		width: 90%;
+		font-size: 14px;
+	}
+
+	.double-spinner, .single-spinner {
+		font-size: 20px;
+	}
+
+	.double-spinner button, .single-spinner button {
+		height: 30px;
+	}
+
+	.double-spinner button:hover, .single-spinner button:hover {
+		box-shadow: none;
+	}
+
+	#add-schedule-element .schedule-element-days {
+		width: 90%;
+		font-size: 14px;
+	}
+
+	#add-schedule-element .schedule-day-off:hover, #add-schedule-element .schedule-day-on:hover {
+		background-color: transparent;
+	}
+
+	#add-schedule-element .schedule-day-off:active, #add-schedule-element .schedule-day-on:active {
+		border-radius: 15px;
+		background-color: #303030;
+	}
+
+	.device-container {
+		width: 90%;
+	}
+
+	.device-selected-true, .device-selected-false {
+		flex: 70%;
+		font-size: 16px;
+	}
+
+	.device-selected-true:hover, .device-selected-false:hover {
+		border-radius: 15px;
+		background-color: transparent;
+	}
+
+	.device-selected-true:active, .device-selected-false:active {
+		border-radius: 15px;
+		background-color: #303030;
+	}
+
+	.device-state {
+		flex: 30%;
+		font-size: 14px;
+	}
+
+	#add-schedule-element .button-container {
+		width: 90%;
+	}
+
+	#add-schedule-element .button-container button {
+		height: 30px;
+	}
+}

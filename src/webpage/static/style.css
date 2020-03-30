@@ -1,0 +1,394 @@
+@charset "utf-8";
+/* CSS Document */
+
+/* The horizontal selector - the box over selections */
+.horizontal-selector {
+	position: relative;
+	width: 100%;
+	display: flex;
+	text-align: center;
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* Hide default HTML checkbox */
+.horizontal-selector input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.horizontal-selector-left, .horizontal-selector-right {
+	flex: 50%;
+	cursor: pointer;
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+
+.horizontal-selector-left:before {
+	position: absolute;
+	content: "";
+	height: 100%;
+	width: 50%;
+	left: 0px;
+	bottom: 0px;
+
+	border-radius: 15px;
+	background-color: rgba(92,121,150,0.20);
+	transition: 0.4s;
+}
+
+input:checked + .horizontal-selector-left:before {
+	transform: translateX(100%);
+}
+
+/* ------------ END OF HORIZONTAL SELECTOR CSS ------------ */
+
+/* The vertical selector - the box over selections */
+
+.vertical-selector {
+	position: relative;
+	width: 100%;
+	display: block;
+	text-align: center;
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* Hide default HTML checkbox */
+.vertical-selector input {
+	display: flex;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.vertical-selector-top, .vertical-selector-bottom {
+	cursor: pointer;
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+
+.vertical-selector-top:before {
+	position: absolute;
+	content: "";
+	height: 50%;
+	width: 100%;
+	left: 0px;
+	bottom: 50%;
+
+	border-radius: 15px;
+	background-color: rgba(92,121,150,0.20);
+	transition: 0.4s;
+}
+
+input:checked + .vertical-selector-top:before {
+	transform: translateY(100%);
+}
+
+/* ------------ END OF VERTICAL SELECTOR CSS ------------ */
+
+body {
+	font-family: segoe ui;
+	color: #e4e4e4;
+	margin: 0px;
+	font-style: normal;
+	font-weight: 300;
+	background-color: #101010;
+	user-select: none;
+}
+
+h1, h2, h3, h4, h5 {
+	font-weight: 300;
+}
+
+a {
+	text-decoration: none;
+	color: #5C7996;
+	font-weight: 500;
+}
+
+button {
+	width: 80%;
+	height: 40px;
+	color: #d0d0d0;
+	background-color: #353535;
+	font-family: segoe ui;
+	font-size: 14px;
+	font-weight: 300;
+	cursor: pointer;
+	border: none;
+	border-radius: 10px;
+	outline: none;
+	box-shadow: 0 0 3px 1px #d0d0d0;
+	-webkit-tap-highlight-color: transparent;
+}
+
+button:hover {
+	box-shadow: 0 0 5px 2px #d0d0d0;
+}
+
+button:active {
+	background-color: #252525;
+}
+
+button:disabled {
+	cursor: not-allowed;
+	box-shadow: 0 0 0px 0px #FFFFFF;
+}
+
+input {
+	width: 80%;
+	color: #d0d0d0;
+	background-color: #353535;
+	font-family: segoe ui;
+	font-size: 14px;
+	font-weight: 300;
+	border: 2px inset #EBE9ED;
+	border-radius: 5px;
+	outline: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+input[type=number] {
+	margin: 0px;
+	padding: 0px;
+	font-size: 24px;
+	text-align: center;
+	border: none;
+	background-color: #2A2A2A;
+	height: 100%;
+}
+
+input[type=number]::-webkit-outer-spin-button {
+	background-color: #FF0004;
+}
+
+input:disabled {
+	color: #848484;
+	background-color: #252525;
+	border: 2px inset #E1E1E1;
+	cursor: not-allowed;
+}
+
+.checkbox {
+	width: 15px;
+	height: 15px;
+}
+
+.nav-bar ul {
+	margin: 0px;
+	padding: 0px;
+	list-style: none;
+	display: table;
+	table-layout: fixed;
+	width: 100%;
+
+	text-align: center;
+	overflow: hidden;
+}
+
+.nav-bar li {
+	display: table-cell;
+}
+
+.nav-bar a {
+	display: block;
+
+	padding: 16px;
+	text-decoration: none;
+	color: #5C7996;
+	font-weight: 500;
+}
+
+.nav-bar a:hover {
+	background-color: #222222;
+	color: #ADBDCC;
+}
+
+.page-wrapper {
+	max-width: 750px;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: #141414;
+}
+
+.top-banner {
+	width: 100%;
+	padding-top: 20px;
+	background-position: center;
+	background-size: cover;
+}
+
+.top-banner h1, .top-banner h3, .top-banner h5 {
+	margin: 0px;
+	padding: 0px;
+	font-weight: 500;
+	text-align: center;
+}
+
+/* Main Content, On/Off Buttons section */
+.featured {
+	display: block;
+	width: 48%;
+	margin-left: 1%;
+	margin-right: 1%;
+	padding-bottom: 10px;
+	float: left;
+}
+
+.featured-full {
+	display: block;
+	width: 98%;
+	margin-left: 1%;
+	margin-right: 1%;
+	padding-bottom: 10px;
+	float: left;
+}
+
+.featured h3, .featured-full h3 {
+	margin: 0px;
+	padding: 0px;
+
+	text-align: center;
+}
+
+.featured-img-on {
+	width: 150px;
+	height: 150px;
+	background-size: cover;
+	margin-left: auto;
+	margin-right: auto;
+
+	background-image: url("on_button.png");
+}
+
+.featured-img-on:hover {
+	border-radius: 10px;
+	background-color: #222222;
+}
+
+.featured-img-on:active {
+	background-image: url("on_button_hover.png");
+}
+
+.featured-img-off {
+	width: 150px;
+	height: 150px;
+	background-size: cover;
+	margin-left: auto;
+	margin-right: auto;
+
+	background-image: url("off_button.png");
+}
+
+.featured-img-off:hover {
+	border-radius: 10px;
+	background-color: #222222;
+}
+
+.featured-img-off:active {
+	background-image: url("off_button_hover.png");
+}
+
+/* Device Add Section */
+.popin-section {
+	width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: #1E1E1E;
+	border-radius: 15px;
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+
+.popin-section hr {
+	width: 90%;
+}
+
+.device-row {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	padding-bottom: 5px;
+	padding-top: 5px;
+	
+}
+
+.device-element {
+	flex: 40%;
+}
+
+.device-element h5 {
+	margin: 0px;
+	padding: 0px;
+}
+
+/* Edit Device Section */
+
+/* Bottom Banner Components */
+
+.bottom-banner {
+	width: 50%;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 10px;
+}
+
+.button-container {
+	display: flex;
+	text-align: center;
+}
+
+.button-element {
+	flex: 100%;
+}
+
+/* For Tablets */
+@media screen and (max-width: 750px) {
+	.page-wrapper {
+		width: 100%;
+	}
+}
+
+/* For Mobile Phones */
+@media screen and (max-width: 600px) {
+	.nav-bar a {
+		font-size: 12px;
+	}
+
+	h1 {
+		font-size: 34px;
+	}
+
+	h3 {
+		font-size: 20px;
+	}
+
+	h5 {
+		font-size: 16px;
+	}
+
+	button:hover {
+		box-shadow: none;
+	}
+
+	.featured {
+		display: block;
+		width: 98%;
+		margin-left: 1%;
+		margin-right: 1%;
+		padding-bottom: 10px;
+		float: left;
+	}
+
+	.featured h3, .featured-full h3 {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.featured-img-on:hover, .featured-img-off:hover {
+		background-color: transparent;
+	}
+}

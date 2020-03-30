@@ -1,0 +1,136 @@
+@charset "utf-8";
+/* CSS Document */
+
+.main {
+	width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.more-section-header {
+	display: flex;
+	border-bottom: 2px solid #5C7996;
+}
+
+.more-section-image {
+	width: 60px;
+	height: 60px;
+	border-radius: 30px;
+
+	margin: 10px;
+	margin-right: 40px;
+
+	background-color: #1E1E1E;
+	background-size: cover;
+}
+
+#settings-image {
+	background-image: url("gears.png");
+}
+
+#info-image {
+	background-image: url("info.png")
+}
+
+.more-section-title {
+	font-size: 40px;
+	text-align: left;
+	margin-top: auto;
+	margin-bottom: auto;
+}
+
+.more-section-content {
+	margin: 5px;
+	padding: 10px;
+	border-radius: 15px;
+	background-color: #1E1E1E;
+}
+
+#social-media {
+	margin: 0px;
+	padding: 0px;
+	font-size: 12px;
+	text-align: center;
+}
+
+.more-section-content-data-row {
+	display: flex;
+}
+
+.more-section-content-data-row h3 {
+	flex: 60%;
+}
+
+#longitude, #latitude, #time-zone {
+	flex: 40%;
+	margin-top: auto;
+	margin-bottom: auto;
+}
+
+.dst-selector-container {
+	flex: 40%;
+	margin-top: auto;
+	margin-bottom: auto;
+}
+
+.submit-container {
+	width: 100%;
+	text-align: center;
+}
+
+#submit-button {
+	width: 200px;
+	height: 30px;
+}
+
+#submit-button:hover {
+	box-shadow: 0 0 5px 2px #d0d0d0;
+}
+
+#submit-button:active {
+	background-color: #252525;
+}
+
+/* For Mobile Phones */
+@media screen and (max-width: 600px) {
+	.more-section-title {
+		font-size: 30px;
+	}
+
+	.more-section-image {
+		width: 45px;
+		height: 45px;
+		border-radius: 25px;
+
+		margin: 5px;
+		margin-right: 20px;
+	}
+
+	.more-section-content p {
+		font-size: 14px;
+	}
+
+	#social-media {
+		font-size: 10px;
+	}
+
+	.more-section-content-data-row h3 {
+		font-size: 14px;
+	}
+
+	#longitude, #latitude, #time-zone {
+		font-size: 18px;
+	}
+
+	.dst-selector-container {
+		font-size: 14px;
+	}
+
+	#submit-button {
+		width: 50%;
+	}
+
+	#submit-button:hover {
+		box-shadow: none;
+	}
+}

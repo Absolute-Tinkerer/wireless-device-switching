@@ -1,0 +1,704 @@
+<!doctype html>
+
+<!--
+S page of the Wireless Outlet Controller web front-end
+
+@author The Absolute Tinkerer
+@date 21 April 2019
+
+Incorporating changes February 2020
+-->
+
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Wireless Controller | Schedule</title>
+	<link rel="stylesheet" href="static/style.css">
+	<link rel="stylesheet" href="static/style-schedule.css">
+	<link rel="shortcut icon" type="image/x-icon" href="static/favicon.ico">
+	
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+</head>
+
+<!--
+	All of the Scripts for the index.html file
+-->
+<script>
+
+	function loadForms() {
+		// ajax query to get data to load up our schedule nodes
+		$.ajax({
+			type: 'POST',
+			url: '/getSchedules',
+			success: function(data) {
+				// Data is ordered as [[ID, State, Devices, Days, Text], [...], ...]
+				// Types are [[String, Boolean, String, Boolean Array, String], [...], ...]
+				var main_content = document.getElementById("content");
+
+				if(data.result.length > 0) {
+					for(var i=0; i < data.result.length; i++) {
+						_loadHelper(main_content, data.result[i]);
+					}
+				}
+				else {
+					var inner_h3 = document.createElement("h3");
+					inner_h3.innerHTML = "Add a schedule to begin!";
+					main_content.insertBefore(inner_h3, main_content.childNodes[0]);
+				}
+			}
+		});
+	}
+
+	function _loadHelper(main_content, data) {
+		// break apart the data and load into variables
+		var id_string = data[0];
+		var on_state = data[1];
+		var device_string = data[2];
+		var days_state = data[3];
+		var time_string = data[4];
+
+		// For the purpose of string formatting, I'll load "checked" into a variable for
+		// the schedule state
+		var check_me = ""
+		if(on_state) {
+			check_me = " checked";
+		}
+
+		// For the purpose of string formatting, I'll load the days' classes into variables
+		var days_classes = ["", "", "", "", "", "", ""];
+
+		for(var i=0; i < days_state.length; i++) {
+			if(days_state[i]) {
+				days_classes[i] = "schedule-day-on";
+			}
+			else {
+				days_classes[i] = "schedule-day-off";
+			}
+		}
+
+		var sunday = days_classes[0];
+		var monday = days_classes[1];
+		var tuesday = days_classes[2];
+		var wednesday = days_classes[3];
+		var thursday = days_classes[4];
+		var friday = days_classes[5];
+		var saturday = days_classes[6];
+
+		// Lastly, I need a string to identify whether we're relative or absolute
+		var type_string = "schedule-element-time-absolute";
+		if(time_string.split(" ").length == 4) {
+			type_string = "schedule-element-time-relative";
+		}
+
+		// This is the element that will receive the data
+		var section = document.createElement("section");
+		section.setAttribute("class", "popin-section");
+		section.setAttribute("id", id_string);
+
+		var temp = `
+			<div class="schedule-element-header">
+				<h3 class="schedule-element-header-data">${device_string}</h3>
+				<button class="schedule-element-header-button" onClick="editClicked(this, '${id_string}');">Edit</button>
+			</div>
+			<div class="schedule-element-footer">
+				<div class="schedule-element-toggle">
+					<label class="switch">
+						<input type="checkbox"${check_me} onClick="toggleSchedule(this, '${id_string}');">
+						<div class="slider"></div>
+					</label>
+				</div>
+				<div class="schedule-element-days">
+					<ul>
+						<li><div class="${sunday}">S</div></li>
+						<li><div class="${monday}">M</div></li>
+						<li><div class="${tuesday}">T</div></li>
+						<li><div class="${wednesday}">W</div></li>
+						<li><div class="${thursday}">T</div></li>
+						<li><div class="${friday}">F</div></li>
+						<li><div class="${saturday}">S</div></li>
+					</ul>
+				</div>
+				<div class="${type_string}">
+					<p>${time_string}</p>
+				</div>
+			</div>
+		`;
+
+		// Now add the html to the section
+		section.innerHTML = temp;
+
+		// Finally add the new section to the main_content!
+		main_content.insertBefore(section, main_content.childNodes[0]);
+	}
+
+	function toggleSchedule(field, id) {
+		// ajax to register the toggle for this schedule item
+		$.ajax({
+			data: {id: id,
+			       state: field.checked},
+			type: 'POST',
+			url: '/toggleSchedule'
+		});
+	}
+
+	function addClicked() {
+		// Begin by disabling the buttons
+		_disableEditFormButtons(true);
+
+		var form = _addEditFormHelper(true, "");
+		var parent = document.getElementById("content");
+		parent.insertBefore(form, parent.children[0]);
+	}
+
+	function editClicked(child, id) {
+		// Begin by disabling the buttons
+		_disableEditFormButtons(true);
+
+		// Load the edit form
+		var form = _addEditFormHelper(false, id);
+		var parent = document.getElementById("content");
+		parent.insertBefore(form, parent.children[0]);
+
+		// Push the schedule element's data to form via ajax query
+		$.ajax({
+			type: 'POST',
+			url: '/getSchedules',
+			success: function(data) {
+				// Data is ordered as [[ID, State, Devices, Days, Text], [...], ...]
+				// Types are [[String, Boolean, String, Boolean Array, String], [...], ...]
+
+				for(var i=0; i < data.result.length; i++) {
+					if(id == data.result[i][0]) {
+						var input = data.result[i];
+
+						// Set the appropriate value for the relative-absolute selector
+						// As well as the sub-values for the relative and absolute times
+						if(input[4].split(" ").length == 4) {
+							$('#relative-absolute-selector').trigger('click');
+
+							var broken_text = input[4].split(" ")
+							if(broken_text[0].length == 1) {
+								$('#relative-2').html(broken_text[0][0])
+							}
+							else {
+								$('#relative-1').html(broken_text[0][0])
+								$('#relative-2').html(broken_text[0][1])
+							}
+
+							if(broken_text[1] == "Hours" || broken_text[1] == "Hour") {
+								$('#min-hour-selector').trigger('click');
+							}
+							if(broken_text[2] == "After") {
+								$('#before-after-selector').trigger('click');
+							}
+							if(broken_text[3] == "Sunset") {
+								$('#sunrise-sunset-selector').trigger('click');
+							}
+						}
+						else {
+							var broken_text = input[4].split(" ")
+							$('#absolute-hours').html(broken_text[0].slice(0, 2));
+							$('#absolute-minutes-1').html(broken_text[0][3]);
+							$('#absolute-minutes-2').html(broken_text[0][4]);
+
+							if(broken_text[1] == "PM") {
+								$('#am-pm-selector').trigger('click');
+							}
+						}
+
+						// Now set the days' classes
+						var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+						for(var j=0; j < input[3].length; j++) {
+							if(input[3][j]) {
+								$('#' + days[j]).attr('class', 'schedule-day-on');
+							}
+						}
+
+						// Finally set the devices and their states
+						var devices = input[2].split(", ");
+
+						for(var j=0; j < devices.length; j++) {
+							var detail = devices[j].split(':');
+							var device = detail[0];
+							var state = detail[1];
+							var content = document.getElementById('add-schedule-element');
+
+							// There are six elements prior to the device beginnings and two after
+							for(var k=6; k < content.children.length - 2; k++) {
+								// The parent element holding the device-specific elements
+								var parent = content.children[k];
+					
+								// Test the current device name with the above device name
+								if(parent.children[0].innerHTML == device) {
+									parent.children[0].click()
+
+									if(state == "OFF") {
+										parent.children[1].children[0].children[0].checked = true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		});
+	}
+
+	function deleteClicked(id) {
+		// Handle deletion event; ajax query to delete from server
+		$.ajax({
+			data: {id: id},
+			type: 'POST',
+			url: '/deleteSchedule',
+			success: function(data) {
+				location.reload();
+			}
+		});
+	}
+
+	function cancelClicked() {
+		var parent = document.getElementById("content");
+		parent.removeChild(parent.children[0]);
+
+		// Finish with enabling the buttons
+		_disableEditFormButtons(false);
+	}
+
+	function saveClicked(id) {
+		// Gathering all of the data we're pushing off
+
+		// Schedule Type (either "Relative" or "Absolute")
+		var schedule_type = "";
+		if(document.getElementById("relative-absolute-selector").checked) {
+			schedule_type = "Relative";
+		}
+		else {
+			schedule_type = "Absolute";
+		}
+
+		// The associated data that depends on absolute vs relative
+		var params = [];
+
+		if(schedule_type == "Absolute") {
+			var hours = document.getElementById("absolute-hours").innerHTML;
+			var m1 = document.getElementById("absolute-minutes-1").innerHTML;
+			var m2 = document.getElementById("absolute-minutes-2").innerHTML;
+			params.push(hours.concat(":", m1, m2));
+
+			if(document.getElementById("am-pm-selector").checked) {
+				params.push("PM");
+			}
+			else {
+				params.push("AM");
+			}
+		}
+		else {
+			var m1 = document.getElementById("relative-1").innerHTML;
+			var m2 = document.getElementById("relative-2").innerHTML;
+			params.push(m1.concat(m2));
+
+			if(document.getElementById("min-hour-selector").checked) {
+				params.push("Hours");
+			}
+			else {
+				params.push("Minutes");
+			}
+
+			if(document.getElementById("before-after-selector").checked) {
+				params.push("After");
+			}
+			else {
+				params.push("Before");
+			}
+
+			if(document.getElementById("sunrise-sunset-selector").checked) {
+				params.push("Sunset");
+			}
+			else {
+				params.push("Sunrise");
+			}
+		}
+
+		// True for a day that's selected, False otherwise
+		var days = [];
+
+		var days_parent = document.getElementById("form-selected-days");
+
+		for(var i=0; i < days_parent.children.length; i++) {
+			var class_name = days_parent.children[i].children[0].className;
+
+			if(class_name == "schedule-day-off") {
+				days.push(false);
+			}
+			else {
+				days.push(true);
+			}
+		}
+
+		// Each entry in this array is a String; a colon separates the device name
+		// from the trigger state
+		var devices = []
+
+		var content = document.getElementById("add-schedule-element");
+
+		// There are six elements prior to the device beginnings and two after
+		for(var i=6; i < content.children.length - 2; i++) {
+			// The parent element holding the device-specific elements
+			var parent = content.children[i];
+
+			// Test the class name of the div with the device
+			if(parent.children[0].className == "device-selected-true") {
+				var output = parent.children[0].innerHTML;
+
+				var checkbox = parent.children[1].children[0].children[0];
+
+				if(checkbox.checked) {
+					devices.push(output.concat(":Off"));
+				}
+				else {
+					devices.push(output.concat(":On"));
+				}
+			}
+		}
+
+		// ajax to push the form's data to the data file
+		$.ajax({
+			data: {schedule_type: schedule_type,
+			       params: params,
+			       days: days,
+			       devices: devices},
+			type: 'POST',
+			url: '/addToSchedule',
+			success: function(data) {
+				// Reload the webpage to reflect the schedule addition
+				// NOTE: No need to re-enable buttons since the reload will do it
+				// The delete function includes a reload, so here, we call the delete
+				// function if we had an id that's passed through
+				if(id != "") {
+					deleteClicked(id);
+				}
+				else {
+					location.reload();
+				}
+			}
+		});
+	}
+
+	function _disableEditFormButtons(state) {
+		// NOTE: state is a boolean. True is "disable the buttons" False is "enable the buttons"
+
+		// Set the disable state of the add button and all of the edit buttons
+		var add_button = document.getElementById("add-schedule-button");
+		add_button.disabled = state;
+
+		var main_content = document.getElementById("content");
+
+		// Iterate over each schedule element to disable the buttons, only if any schedule elements exist
+		if(main_content.children.length == 0) {
+			for(var i=0; i < main_content.children.length; i++) {
+				main_content.children[i].children[0].children[1].disabled = state;
+			}
+		}
+	}
+	
+	function _addEditFormHelper(isAdd, id) {
+		// NOTE: mode is a boolean. True equates to "add was clicked" and False is
+		// "edit was clicked"
+
+		// This is what we're returning
+		var form = document.createElement("section");
+
+		// Encase everything in the ajax function due to asynchronous nature
+		$.ajax({
+			type: 'POST',
+			url: '/getTitles',
+			success: function(data) {
+				var devices = "";
+				var dont_save = "";
+
+				if(data.result.length > 0) {
+					for(var i=data.result.length-1; i >= 0; i--) {
+						var device = data.result[i];
+
+						devices = devices.concat(`
+							<div class="device-container">
+								<div onClick="swapDeviceClass(this);" class="device-selected-false">${device}</div>
+							</div>
+						`);
+					}
+				}
+				else {
+					devices = `
+						<div class="device-container">Add a device to begin!</div>
+					`;
+					dont_save = " disabled";
+				}
+
+				var buttons;
+				if(isAdd) {
+					buttons = `
+						<div class="button-element">
+							<button onClick="cancelClicked();">Cancel</button>
+						</div>
+						<div class="button-element">
+							<button onClick="saveClicked('');"${dont_save}>Save</button>
+						</div>
+					`;
+				}
+				else {
+					buttons = `
+						<div class="button-element">
+							<button onClick="deleteClicked('${id}');">Delete</button>
+						</div>
+						<div class="button-element">
+							<button onClick="cancelClicked();">Cancel</button>
+						</div>
+						<div class="button-element">
+							<button onClick="saveClicked('${id}');">Save</button>
+						</div>
+					`;
+				}
+		
+				form.setAttribute("id", "add-schedule-element");
+				form.setAttribute("class", "popin-section");
+				form.innerHTML = `
+					<div class="add-relative-absolute-selector">
+						<label class="horizontal-selector">
+							<input id="relative-absolute-selector" type="checkbox" onClick="swapTimeType(this, this.parentNode.parentNode);">
+							<div class="horizontal-selector-left">Absolute</div>
+							<div class="horizontal-selector-right">Relative</div>
+						</label>
+					</div>
+					<hr>
+					<div class="add-absolute">
+						<div class="double-spinner">
+							<button onClick="upPressed(this, 1, 12);">+</button>
+							<p id="absolute-hours">12</p>
+							<button onClick="downPressed(this, 1, 12);">-</button>
+						</div>
+						<div class="colon">:</div>
+						<div class="single-spinner">
+							<button onClick="upPressed(this, 0, 5);">+</button>
+							<p id="absolute-minutes-1">0</p>
+							<button onClick="downPressed(this, 0, 5);">-</button>
+						</div>
+						<div class="single-spinner">
+							<button onClick="upPressed(this, 0, 9);">+</button>
+							<p id="absolute-minutes-2">0</p>
+							<button onClick="downPressed(this, 0, 9);">-</button>
+						</div>
+						<div class="absolute-am-pm-selector">
+							<label class="vertical-selector">
+								<input id="am-pm-selector" type="checkbox">
+								<div class="vertical-selector-top">AM</div>
+								<div class="vertical-selector-bottom">PM</div>
+							</label>
+						</div>
+					</div>
+					<hr>
+					<div class="schedule-element-days">
+						<ul id="form-selected-days">
+							<li><div id="Sunday" onClick="swapDayClass(this);" class="schedule-day-off">S</div></li>
+							<li><div id="Monday" onClick="swapDayClass(this);" class="schedule-day-off">M</div></li>
+							<li><div id="Tuesday" onClick="swapDayClass(this);" class="schedule-day-off">T</div></li>
+							<li><div id="Wednesday" onClick="swapDayClass(this);" class="schedule-day-off">W</div></li>
+							<li><div id="Thursday" onClick="swapDayClass(this);" class="schedule-day-off">T</div></li>
+							<li><div id="Friday" onClick="swapDayClass(this);" class="schedule-day-off">F</div></li>
+							<li><div id="Saturday" onClick="swapDayClass(this);" class="schedule-day-off">S</div></li>
+						</ul>
+					</div>
+					<hr>
+					${devices}
+					<hr>
+					<div class="button-container">
+						${buttons}
+					</div>
+				`;
+			}
+		});
+		
+		return form;
+	}
+
+	function swapTimeType(child, parent) {
+		// This is for relative time
+		if(child.checked) {
+			// Begin by removing the absolute time entry
+			parent.parentNode.removeChild(parent.nextElementSibling.nextElementSibling);
+
+			// Now add in the relative time HTML
+			var newChild = document.createElement("div");
+			newChild.setAttribute("class", "add-relative");
+			newChild.innerHTML = `
+				<div class="single-spinner">
+					<button onClick="upPressed(this, 0, 5);">+</button>
+					<p id="relative-1">0</p>
+					<button onClick="downPressed(this, 0, 5);">-</button>
+				</div>
+				<div class="single-spinner">
+					<button onClick="upPressed(this, 0, 9);">+</button>
+					<p id="relative-2">0</p>
+					<button onClick="downPressed(this, 0, 9);">-</button>
+				</div>
+				<div class="relative-min-hour-selector">
+					<label class="vertical-selector">
+						<input id="min-hour-selector" type="checkbox">
+						<div class="vertical-selector-top">Minutes</div>
+						<div class="vertical-selector-bottom">Hours</div>
+					</label>
+				</div>
+				<div class="relative-before-after-selector">
+					<label class="vertical-selector">
+						<input id="before-after-selector" type="checkbox">
+						<div class="vertical-selector-top">Before</div>
+						<div class="vertical-selector-bottom">After</div>
+					</label>
+				</div>
+				<div class="relative-sunrise-sunset-selector">
+					<label class="vertical-selector">
+						<input id="sunrise-sunset-selector" type="checkbox">
+						<div class="vertical-selector-top">Sunrise</div>
+						<div class="vertical-selector-bottom">Sunset</div>
+					</label>
+				</div>
+			`;
+
+			parent.parentNode.insertBefore(newChild, parent.nextElementSibling.nextElementSibling);
+		}
+		// This is for absolute time
+		else {
+			// Begin by removing the relative time entry
+			parent.parentNode.removeChild(parent.nextElementSibling.nextElementSibling);
+
+			// Now add the absolute time HTML
+			var newChild = document.createElement("div");
+			newChild.setAttribute("class", "add-absolute");
+			newChild.innerHTML = `
+				<div class="double-spinner">
+					<button onClick="upPressed(this, 1, 12);">+</button>
+					<p id="absolute-hours">12</p>
+					<button onClick="downPressed(this, 1, 12);">-</button>
+				</div>
+				<div class="colon">:</div>
+				<div class="single-spinner">
+					<button onClick="upPressed(this, 0, 5);">+</button>
+					<p id="absolute-minutes-1">0</p>
+					<button onClick="downPressed(this, 0, 5);">-</button>
+				</div>
+				<div class="single-spinner">
+					<button onClick="upPressed(this, 0, 9);">+</button>
+					<p id="absolute-minutes-2">0</p>
+					<button onClick="downPressed(this, 0, 9);">-</button>
+				</div>
+				<div class="absolute-am-pm-selector">
+					<label class="vertical-selector">
+						<input id="am-pm-selector" type="checkbox">
+						<div class="vertical-selector-top">AM</div>
+						<div class="vertical-selector-bottom">PM</div>
+					</label>
+				</div>
+			`;
+
+			parent.parentNode.insertBefore(newChild, parent.nextElementSibling.nextElementSibling);
+		}
+	}
+
+	Number.prototype.mod = function(n) {
+    	// So, it turns out JavaScript is stupid for negative modulos...
+		// This repairs JavaScript's stupidity
+		return ((this % n) + n) % n;
+	};
+
+	function upPressed(child, min_val, max_val) {
+		var num = parseInt(child.nextElementSibling.innerHTML);
+		// Increment the value
+		num += 1;
+		// Wrap the value with the appropriate bounds
+		num = min_val + (num - min_val).mod(max_val + 1 - min_val);
+		// Push the value back to the sibling
+		var str = num.toString();
+		if(str.length == 1 && max_val.toString().length > 1) {
+			str = "0".concat(str);
+		}
+		child.nextElementSibling.innerHTML = str;
+	}
+
+	function downPressed(child, min_val, max_val) {
+		var num = parseInt(child.previousElementSibling.innerHTML);
+		// Decrement the value
+		num -= 1;
+		// Wrap the value with the appropriate bounds
+		num = min_val + (num - min_val).mod(max_val + 1 - min_val);
+		// Push the value back to the sibling
+		var str = num.toString();
+		if(str.length == 1 && max_val.toString().length > 1) {
+			str = "0".concat(str);
+		}
+		child.previousElementSibling.innerHTML = str;
+	}
+
+	function swapDayClass(child) {
+		// Switch the on/off state of this day
+		if(child.className == "schedule-day-off") {
+			child.setAttribute("class", "schedule-day-on");
+		}
+		else {
+			child.setAttribute("class", "schedule-day-off");
+		}
+	}
+	
+	function swapDeviceClass(child) {
+		// Switch the on/off state of this day
+		if(child.className == "device-selected-false") {
+			child.setAttribute("class", "device-selected-true");
+
+			// Add in the ON/OFF Horizontal Selector
+			var newChild = document.createElement("div");
+			newChild.setAttribute("class", "device-state");
+			newChild.innerHTML = `
+				<label class="horizontal-selector">
+					<input type="checkbox">
+					<div class="horizontal-selector-left">On</div>
+					<div class="horizontal-selector-right">Off</div>
+				</label>
+			`;
+			
+			child.parentNode.insertBefore(newChild, child.nextSibling);
+		}
+		else {
+			child.setAttribute("class", "device-selected-false");
+
+			// Remove the ON/OFF Horizontal Selector
+			child.parentNode.removeChild(child.nextElementSibling);
+		}
+	}
+
+</script>
+
+<body onload="loadForms();">
+	<div class="page-wrapper">
+		<nav class="nav-bar">
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="">Schedule</a></li>
+				<li><a href="more.html">More</a></li>
+			</ul>
+		</nav>
+		<header class="top-banner">
+			<h1>Device Scheduling</h1>
+			<h3>{{ today }}</h3>
+			<h5>Sunrise: {{ sunrise }} | Sunset: {{ sunset }}</h5>
+			<div class="header-add-button">
+				<button id="add-schedule-button" class="add-schedule-button" onClick="addClicked()">+</button>
+			</div>
+		</header>
+		<hr>
+		<main id="content" class="main">
+		</main>
+		<hr>
+	</div>
+</body>
+</html>

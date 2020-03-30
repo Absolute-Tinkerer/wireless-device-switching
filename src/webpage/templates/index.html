@@ -1,0 +1,468 @@
+<!doctype html>
+
+<!--
+Index page of the Wireless Outlet Controller web front-end
+
+@author The Absolute Tinkerer
+@date 21 April 2019
+
+Incorporating changes February 2020
+-->
+
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Wireless Controller</title>
+	<link rel="stylesheet" href="static/style.css">
+	<link rel="shortcut icon" type="image/x-icon" href="static/favicon.ico">
+	
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+</head>
+
+<!--
+	All of the Scripts for the index.html file
+-->
+<script>
+	function loadForms() {
+		// ajax to load the titles from the data file
+		$.ajax({
+			data : {title : ''},
+			type : 'POST',
+			url : '/getStates',
+			success : function(data) {
+				var section = document.getElementById("primary-section");
+
+				if(data.result.length > 0) {
+					for(var i=0; i < data.result.length; i++) {
+						if(data.result.length % 2 == 1 && i == data.result.length - 1) {
+							_loadHelper(section, data.result[i], "featured-full");
+						}
+						else {
+							_loadHelper(section, data.result[i], "featured");
+						}
+					}
+				}
+				else {
+					var inner_div = document.createElement("div");
+					inner_div.setAttribute("class", "featured-full");
+
+					var inner_h3 = document.createElement("h3");
+					inner_h3.innerHTML = "Add a device to begin!";
+					inner_div.insertBefore(inner_h3, inner_div.childNodes[0]);
+					section.insertBefore(inner_div, section.childNodes[0]);
+				}
+			}
+		});
+	}
+	
+	function _loadHelper(section, data, class_type) {
+		var outer_div = document.createElement("div");
+		outer_div.setAttribute("class", class_type);
+
+		var inner_div = document.createElement("div");
+		inner_div.setAttribute("id", data[0]);
+
+		if(data[1] == "ON") {
+			inner_div.setAttribute("class", "featured-img-on");
+		}
+		else {
+			inner_div.setAttribute("class", "featured-img-off");
+		}
+		
+		inner_div.setAttribute("onClick", "controlButtonClicked('"+data[0]+"');")
+		outer_div.insertBefore(inner_div, outer_div.childNodes[0]);
+
+		var inner_h3 = document.createElement("h3");
+		inner_h3.innerHTML = data[0];
+		outer_div.insertBefore(inner_h3, inner_div); // inner_div -> outer_div.childNodes[0]
+
+		section.insertBefore(outer_div, section.childNodes[0]);
+	}
+
+	function controlButtonClicked(btn_title) {
+		// ajax to command the server to toggle the device, based on JS condition
+		var button = document.getElementById(btn_title);
+
+		if(button.className == "featured-img-off") {
+			$.ajax({
+				data : {title : btn_title},
+				type : 'POST',
+				url : '/turnOn',
+				success : function(data) {
+					button.setAttribute("class", "featured-img-on");
+				}
+			});
+		}
+		else {
+			$.ajax({
+				data : {title : btn_title},
+				type : 'POST',
+				url : '/turnOff',
+				success : function(data) {
+					button.setAttribute("class", "featured-img-off");
+				}
+			});
+		}
+	}
+
+	function addDevice() {
+		var element = document.getElementById("content");
+		
+		var section = document.createElement("section");
+		var hr = document.createElement("hr");
+		section.setAttribute("class", "popin-section");
+		section.setAttribute("id", "add-device-section");
+		section.innerHTML = `
+			<div class="device-row">
+				<div class="device-element">
+					<h5>Title</h5>
+				</div>
+				<div class="device-element">
+					<input id="device-title" type="text" onChange="checkTitle(this.value);">
+				</div>
+			</div>
+			<div class="device-row">
+				<div class="device-element">
+					<button id="on-read-button" onClick="findOnCode();" disabled>ON CODE</button>
+				</div>
+				<div class="device-element">
+					<input id="device-on-code" type="text" disabled>
+				</div>
+			</div>
+			<div class="device-row">
+				<div class="device-element">
+					<button id="off-read-button" onClick="findOffCode();" disabled>OFF CODE</button>
+				</div>
+				<div class="device-element">
+					<input id="device-off-code" type="text" disabled>
+				</div>
+			</div>
+			<hr>
+			<div class="device-row">
+				<div class="device-element">
+					<button id="read-save" onClick="saveAddDevice();" disabled>OK</button>
+				</div>
+				<div class="device-element">
+					<button id="read-cancel" onClick="cancelAddDevice();">Cancel</button>
+				</div>
+			</div>
+		`;
+		
+		var len = element.childNodes.length;
+		element.insertBefore(hr, element.childNodes[len-1]);
+		element.insertBefore(section, element.childNodes[len]);
+		
+		var addButton = document.getElementById("add-button");
+		addButton.disabled = true;
+		var editButton = document.getElementById("edit-button");
+		editButton.disabled = true;
+	}
+
+	function cancelAddDevice() {
+		var title = document.getElementById("device-title");
+		var add_button = document.getElementById("add-button");
+		var edit_button = document.getElementById("edit-button");
+
+		// Kill this element from the data file using ajax
+		$.ajax({
+			data : {title : title.value},
+			type : 'POST',
+			url : '/removeAdd',
+			success : function(data) {
+				location.reload();
+				add_button.disabled = false;
+				edit_button.disabled = false;
+			}
+		})
+	}
+
+	function checkTitle(new_device_name) {
+		var title = document.getElementById("device-title");
+		var on_read_button = document.getElementById("on-read-button");
+		var off_read_button = document.getElementById("off-read-button");
+
+		// ajax to send the title to the server and see if it exists
+		$.ajax({
+			data : {title : new_device_name},
+			type : 'POST',
+			url : '/checkTitle',
+			success : function(data) {
+				if(data.result == 'Title Exists') {
+					on_read_button.disabled = true;
+					off_read_button.disabled = true;
+					title.border = "2px inset #FF0000";
+				}
+				else {
+					on_read_button.disabled = false;
+					off_read_button.disabled = false;
+					title.border = "2px inset #EBE9ED";
+				}
+			}
+		});
+	}
+
+	function findOnCode() {
+		var device_title = document.getElementById("device-title");
+		var on_read_button = document.getElementById("on-read-button");
+		var on_code = document.getElementById("device-on-code");
+		var off_code = document.getElementById("device-off-code");
+		var ok_button = document.getElementById("read-save");
+
+		on_read_button.disabled = true;
+
+		// ajax to send the title to the server & receive code back
+		$.ajax({
+			data : {title : device_title.value},
+			type : 'POST',
+			url : '/findOnCode',
+			success : function(data) {
+				device_title.disabled = true;
+				on_code.value = data.result;
+
+				if(data.result == 'Code Not Found') {
+					on_read_button.disabled = false;
+				}
+
+				if(on_code.value != '' && off_code.value != '') {
+					ok_button.disabled = false;
+				}
+			}
+		});
+
+		return false;
+	}
+
+	function findOffCode() {
+		var device_title = document.getElementById("device-title");
+		var off_read_button = document.getElementById("off-read-button");
+		var on_code = document.getElementById("device-on-code");
+		var off_code = document.getElementById("device-off-code");
+		var ok_button = document.getElementById("read-save");
+
+		off_read_button.disabled = true;
+
+		// ajax to send the title to the server & receive code back
+		$.ajax({
+			data : {title : device_title.value},
+			type : 'POST',
+			url : '/findOffCode',
+			success : function(data) {
+				device_title.disabled = true;
+				off_code.value = data.result;
+
+				if(data.result == 'Code Not Found') {
+					off_read_button.disabled = false;
+				}
+
+				if(on_code.value != '' && off_code.value != '') {
+					ok_button.disabled = false;
+				}
+			}
+		});
+
+		return false;
+	}
+
+	function saveAddDevice() {
+		var device_title = document.getElementById("device-title");
+
+		// Use ajax to finalize the save (add state line to data file)
+		$.ajax({
+			data : {title : device_title.value},
+			type : 'POST',
+			url : '/finalizeSave',
+			success : function(data) {
+				location.reload();
+			}
+		});
+	}
+
+	function editDevices() {
+		var element = document.getElementById("content");
+		
+		var section = document.createElement("section");
+		var hr = document.createElement("hr");
+		section.setAttribute("class", "popin-section");
+		section.setAttribute("id", "edit-device-section");
+		section.innerHTML = `
+			<div class="device-row">
+				<div class="device-element">
+					<h5>Title</h5>
+				</div>
+				<div class="device-element">
+					<h5>Delete?</h5>
+				</div>
+			</div>
+			<hr>
+			<hr>
+			<div class="device-row">
+				<div class="device-element">
+					<button id="edit-save" onClick="editSave();">OK</button>
+				</div>
+				<div class="device-element">
+					<button id="edit-cancel" onClick="editCancel();">Cancel</button>
+				</div>
+			</div>
+		`;
+		
+		var len = element.childNodes.length
+		element.insertBefore(hr, element.childNodes[len-1]);
+		element.insertBefore(section, element.childNodes[len]);
+
+		// ajax to load the titles from the data file
+		$.ajax({
+			data : {title : ''},
+			type : 'POST',
+			url : '/getTitles',
+			success : function(data) {
+				if(data.result.length > 0) {
+					for(var i=0; i < data.result.length; i++) {
+						_editHelper(section, data.result[i]);
+					}
+				}
+				else {
+					var len = section.children.length;
+					var inner_h5 = document.createElement("h5");
+					inner_h5.innerHTML = "Add a device to begin!";
+					section.insertBefore(inner_h5, section.children[2]);
+				}
+			}
+		});
+	}
+
+	function _editHelper(section, title) {
+		var outer_div = document.createElement("div");
+		outer_div.setAttribute("class", "device-row");
+
+		var inner_div1 = document.createElement("div");
+		inner_div1.setAttribute("class", "device-element");
+		var checkbox = document.createElement("input");
+		checkbox.setAttribute("class", "checkbox");
+		checkbox.setAttribute("type", "checkbox");
+		checkbox.setAttribute("onClick", "checkboxClicked(this.parentElement.parentElement.parentElement, this.parentElement.parentElement, this);");
+		inner_div1.insertBefore(checkbox, inner_div1.children[0]);
+		outer_div.insertBefore(inner_div1, outer_div.children[0]);
+
+		var inner_div2 = document.createElement("div");
+		inner_div2.setAttribute("class", "device-element");
+		var input = document.createElement("input");
+		input.setAttribute("type", "text");
+		input.value = title;
+		inner_div2.insertBefore(input, inner_div2.children[0]);
+		outer_div.insertBefore(inner_div2, outer_div.children[0]);
+
+		section.insertBefore(outer_div, section.children[2]);
+	}
+
+	function checkboxClicked(parent, child, item) {
+		// Gives the appropriate index of the element to delete
+		var index = Array.prototype.indexOf.call(parent.children, child) - 2;
+		var section = document.getElementById("edit-device-section");
+		var input = child.children[0].children[0];
+
+		if(item.checked) {
+			// Get the titles to reset the field
+			// ajax to load the titles from the data file
+			$.ajax({
+				data : {title : ''},
+				type : 'POST',
+				url : '/getTitles',
+				success : function(data) {
+					var len = data.result.length
+					input.value = data.result[len-1-index];
+					input.disabled = true;
+				}
+			});
+		}
+		else {
+			input.disabled = false;
+		}
+	}
+
+	function editSave() {
+		// TODO: confirm no newly-edited fields are the same
+		var section = document.getElementById("edit-device-section");
+		var len = section.children.length;
+		var newTitles = [];
+		var deleteTitles = [];
+
+		for(var i=0; i < len-4; i++) {
+			// Push the new titles to the newTitles list
+			var title = section.children[i+2].children[0].children[0].value;
+			newTitles.push(title);
+
+			// Push the titles to delete to the delete list
+			if(section.children[i+2].children[1].children[0].checked) {
+				deleteTitles.push(title);
+			}
+		}
+
+		if(newTitles.length > 0) {
+			// Now change the title names using ajax
+			$.ajax({
+				data : {titles : newTitles},
+				type : 'POST',
+				// TODO: add this function
+				url : '/changeTitles',
+				success : function(data) {
+					for(var i=0; i < len-4; i++) {
+						section.children[i+2].children[0].disabled = true;
+					}
+				}
+			});
+		}
+
+		if(deleteTitles.length > 0) {
+			// Now delete the titles using ajax
+			$.ajax({
+				data : {titles : deleteTitles},
+				type : 'POST',
+				url : '/deleteOutlets'
+			});
+		}
+
+		location.reload();
+	}
+
+	function editCancel() {
+		location.reload();
+	}
+
+</script>
+
+<body onload="loadForms();">
+	<div class="page-wrapper">
+		<nav class="nav-bar">
+			<ul>
+				<li><a href="">Home</a></li>
+				<li><a href="schedule.html">Schedule</a></li>
+				<li><a href="more.html">More</a></li>
+			</ul>
+		</nav>
+		<header class="top-banner">
+			<h1>Wireless Controller</h1>
+			<h3>{{ today }}</h3>
+			<h5>Sunrise: {{ sunrise }} | Sunset: {{ sunset }}</h5>
+			<hr>
+		</header>
+		<main id="content" class="main">
+			<section id="primary-section" class="primary-section">
+			</section>
+		</main>
+		<hr>
+		<footer class="bottom-banner">
+			<div class="button-container">
+				<div class="button-element">
+					<button id="add-button" onClick="addDevice()">Add</button>
+				</div>
+				<div class="button-element">
+					<button id="edit-button" onClick="editDevices()">Edit</button>
+				</div>
+			</div>
+		</footer>
+    </div>
+</body>
+
+</html>
