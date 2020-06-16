@@ -14,6 +14,8 @@ The following is a list of everything you need to make this project:
   <li>A computer on your network, as well as a keyboard, mouse, and computer monitor</li>
 </ul>
 
+<a href="https://www.youtube.com/watch?v=Cvs9IzE8Qcc"><img src="https://img.youtube.com/vi/Cvs9IzE8Qcc/0.jpg"></a>
+
 <hr>
 <h3>(1) Set Up Your Raspberry Pi</h3>
 <ul>
